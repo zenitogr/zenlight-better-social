@@ -11,16 +11,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       await signIn(email, password);
-      router.push('/');
+      router.replace('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid email or password');
+      setIsLoading(false);
     }
   };
 
@@ -57,8 +60,8 @@ export default function LoginPage() {
             />
           </div>
 
-          <Button type="submit" className="w-full">
-            Sign in
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
 
