@@ -2,6 +2,9 @@ zerops:
   - setup: app
     build:
       base: nodejs@22
+      envVariables:
+        NEXT_PUBLIC_SUPABASE_URL: https://ikvtvhhbdctpjursngje.supabase.co
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrdnR2aGhiZGN0cGp1cnNuZ2plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg4NDc4NDEsImV4cCI6MjA1NDQyMzg0MX0.DUfGr4tUFio_sJxSAOl9QBwPzlU1M3nejdbTAyAaZUg
       buildCommands:
         - npm i
         - npm run build
