@@ -1,27 +1,59 @@
 import { useEffect, useState } from 'react';
 import type { Post } from '@/types/post';
+import { createClient } from '@/lib/supabase/client';
 
 export function usePosts(type: 'global' | 'personalized' = 'global') {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const supabase = createClient();
 
-  useEffect(() => {
-    // TODO: Implement fetch from Supabase
-    // For now, just simulate loading
-    setLoading(false);
-  }, [type]);
+  const fetchPosts = async () => {
+    try {
+      const query = supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  const createPost = async (content: string, media?: File[]) => {
-    // TODO: Implement post creation
+      if (type === 'personalized') {
+        // Add personalization logic here
+      }
+
+      const { data, error: fetchError } = await query;
+      
+      if (fetchError) throw fetchError;
+      setPosts(data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch posts'));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const likePost = async (postId: string) => {
+  const createPost = async (content: string) => {
+    try {
+      const { error: createError } = await supabase
+        .from('posts')
+        .insert([{ content }]);
+
+      if (createError) throw createError;
+      // Refetch posts after creating a new one
+      await fetchPosts();
+    } catch (err) {
+      throw err instanceof Error ? err : new Error('Failed to create post');
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, [type]);
+
+  const likePost = async () => {
     // TODO: Implement like functionality
   };
 
-  const sharePost = async (postId: string) => {
-    // TODO: Implement share functionality
+  const commentOnPost = async () => {
+    // TODO: Implement comment functionality
   };
 
   return {
@@ -30,6 +62,7 @@ export function usePosts(type: 'global' | 'personalized' = 'global') {
     error,
     createPost,
     likePost,
-    sharePost,
+    commentOnPost,
+    refetch: fetchPosts,
   };
 } 

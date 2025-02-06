@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Post } from '@/types/post';
+import { PostCard } from '@/components/post/PostCard';
 
 interface ProfileTabsProps {
   posts: Post[];
@@ -19,19 +19,40 @@ export function ProfileTabs({ posts, comments, likes }: ProfileTabsProps) {
         <TabsTrigger value="likes">Likes</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="posts" className="mt-4">
-        {/* TODO: Add PostList component */}
-        Posts content
+      <TabsContent value="posts" className="mt-4 space-y-4">
+        {posts.map(post => (
+          <PostCard
+            key={post.id}
+            post={post}
+            onLike={() => {}}
+            onComment={() => {}}
+            onShare={() => {}}
+          />
+        ))}
       </TabsContent>
 
-      <TabsContent value="comments" className="mt-4">
-        {/* TODO: Add PostList component */}
-        Comments content
+      <TabsContent value="comments" className="mt-4 space-y-4">
+        {comments.map(post => (
+          <PostCard
+            key={post.id}
+            post={post}
+            onLike={() => {}}
+            onComment={() => {}}
+            onShare={() => {}}
+          />
+        ))}
       </TabsContent>
 
-      <TabsContent value="likes" className="mt-4">
-        {/* TODO: Add PostList component */}
-        Likes content
+      <TabsContent value="likes" className="mt-4 space-y-4">
+        {likes.map(post => (
+          <PostCard
+            key={post.id}
+            post={post}
+            onLike={() => {}}
+            onComment={() => {}}
+            onShare={() => {}}
+          />
+        ))}
       </TabsContent>
     </Tabs>
   );

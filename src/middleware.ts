@@ -13,10 +13,14 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          requestHeaders.append('Set-Cookie', `${name}=${value}`)
+          requestHeaders.append('Set-Cookie', 
+            `${name}=${value}; Path=${options.path || '/'}; ${options.httpOnly ? 'HttpOnly;' : ''}`
+          )
         },
         remove(name: string, options: CookieOptions) {
-          requestHeaders.append('Set-Cookie', `${name}=`)
+          requestHeaders.append('Set-Cookie', 
+            `${name}=; Path=${options.path || '/'}; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
+          )
         },
       },
     }

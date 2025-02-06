@@ -13,7 +13,7 @@ export default function ProfilePage() {
   const mockProfile = {
     id: '1',
     username: username,
-    avatarUrl: null,
+    avatarUrl: undefined,
     friendCount: 0,
     followerCount: 0,
     followingCount: 0,
