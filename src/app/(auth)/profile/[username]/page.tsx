@@ -3,18 +3,16 @@
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { notFound } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
-interface ProfilePageProps {
-  params: {
-    username: string;
-  };
-}
+export default function ProfilePage() {
+  const params = useParams();
+  const username = params.username as string;
 
-export default function ProfilePage({ params }: ProfilePageProps) {
   // TODO: Fetch profile data from Supabase
   const mockProfile = {
     id: '1',
-    username: params.username,
+    username: username,
     avatarUrl: null,
     friendCount: 0,
     followerCount: 0,
