@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import type { Post } from '@/types/post';
 import { createClient } from '@/lib/supabase/client';
 
@@ -6,9 +6,11 @@ export function usePosts(type: 'global' | 'personalized' = 'global') {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const supabase = createClient();
+  
+  // Memoize the supabase client
+  const supabase = useMemo(() => createClient(), []);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       const query = supabase
         .from('posts')
@@ -28,7 +30,7 @@ export function usePosts(type: 'global' | 'personalized' = 'global') {
     } finally {
       setLoading(false);
     }
-  };
+  }, [type, supabase]); // Add supabase to dependencies
 
   const createPost = async (content: string) => {
     try {
@@ -46,7 +48,7 @@ export function usePosts(type: 'global' | 'personalized' = 'global') {
 
   useEffect(() => {
     fetchPosts();
-  }, [type]);
+  }, [fetchPosts]);
 
   const likePost = async () => {
     // TODO: Implement like functionality
