@@ -3,8 +3,8 @@ zerops:
     build:
       base: nodejs@22
       buildCommands:
-        - pnpm i
-        - pnpm run build
+        - npm i
+        - npm run build
       deployFiles: ./
     run:
       base: nodejs@22
@@ -14,7 +14,7 @@ zerops:
       ports:
         - port: 3000
           httpSupport: true
-      start: pnpm start
+      start: npm start
   - setup: prod
     extends: app
   - setup: dev
