@@ -1,15 +1,8 @@
 export type Post = {
   id: string;
+  user_id: string;
   content: string;
-  authorId: string;
-  parentId?: string | null; // If it's a comment
-  createdAt: string;
-  updatedAt: string;
-  likeCount: number;
-  commentCount: number;
-  shareCount: number;
-  media?: {
-    type: 'image' | 'video';
-    url: string;
-  }[];
+  likes_count: number;
+  created_at: string | null;
+  updated_at: string | null;
 }; 

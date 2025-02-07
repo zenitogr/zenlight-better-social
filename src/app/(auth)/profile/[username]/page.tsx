@@ -7,62 +7,86 @@ import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { Profile } from '@/types/profile';
+import { Post } from '@/types/post';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProfilePage() {
   const params = useParams();
   const username = params.username as string;
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchProfile() {
+    async function fetchProfileAndPosts() {
       const supabase = createClient();
-      const { data, error } = await supabase
+      
+      // Fetch profile
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('username', username)
         .single();
 
-      if (error || !data) {
+      if (profileError || !profileData) {
         notFound();
       }
 
+      // Fetch posts for this user
+      const { data: postsData, error: postsError } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', profileData.id)
+        .order('created_at', { ascending: false });
+
+      if (postsError) {
+        console.error('Error fetching posts:', postsError);
+      }
+
       setProfile({
-        ...data,
+        ...profileData,
         friendCount: 0,
         followerCount: 0,
         followingCount: 0,
         isFollowing: false,
         isFriend: false,
         friendRequestStatus: 'none' as const,
-        avatarUrl: data.avatar_url
+        avatarUrl: profileData.avatar_url
       });
+      setPosts(postsData || []);
       setLoading(false);
     }
 
-    fetchProfile();
+    fetchProfileAndPosts();
   }, [username]);
 
-  if (loading || !profile) {
-    return <div>Loading...</div>; // You could use your loading skeleton here
+  if (loading) {
+    return (
+      <div className="container max-w-4xl mx-auto py-6 px-4">
+        <Skeleton className="h-48 w-full mb-6" />
+        <div className="space-y-4">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </div>
+    );
   }
 
-  // TODO: Check if this is the current user's profile
-  const isOwnProfile = false;
+  if (!profile) {
+    return notFound();
+  }
 
   return (
     <main className="container max-w-4xl mx-auto py-6 px-4">
-      <ProfileHeader 
-        profile={profile}
-        isOwnProfile={isOwnProfile}
-        onFollow={() => {}}
-        onFriendRequest={() => {}}
-      />
-      <ProfileTabs 
-        posts={[]}
-        comments={[]}
-        likes={[]}
-      />
+      <ProfileHeader profile={profile} />
+      <div className="mt-6">
+        <ProfileTabs 
+          posts={posts}
+          comments={[]} // We'll implement comments later
+          likes={[]}    // We'll implement likes later
+        />
+      </div>
     </main>
   );
 } 
