@@ -4,27 +4,47 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { notFound } from 'next/navigation';
 import { useParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import { useEffect, useState } from 'react';
+import { Profile } from '@/types/profile';
 
 export default function ProfilePage() {
   const params = useParams();
   const username = params.username as string;
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // TODO: Fetch profile data from Supabase
-  const mockProfile = {
-    id: '1',
-    username: username,
-    avatarUrl: undefined,
-    friendCount: 0,
-    followerCount: 0,
-    followingCount: 0,
-    isFollowing: false,
-    isFriend: false,
-    friendRequestStatus: 'none' as const,
-  };
+  useEffect(() => {
+    async function fetchProfile() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('username', username)
+        .single();
 
-  // TODO: Check if profile exists
-  if (!mockProfile) {
-    notFound();
+      if (error || !data) {
+        notFound();
+      }
+
+      setProfile({
+        ...data,
+        friendCount: 0,
+        followerCount: 0,
+        followingCount: 0,
+        isFollowing: false,
+        isFriend: false,
+        friendRequestStatus: 'none' as const,
+        avatarUrl: data.avatar_url
+      });
+      setLoading(false);
+    }
+
+    fetchProfile();
+  }, [username]);
+
+  if (loading || !profile) {
+    return <div>Loading...</div>; // You could use your loading skeleton here
   }
 
   // TODO: Check if this is the current user's profile
@@ -33,7 +53,7 @@ export default function ProfilePage() {
   return (
     <main className="container max-w-4xl mx-auto py-6 px-4">
       <ProfileHeader 
-        profile={mockProfile}
+        profile={profile}
         isOwnProfile={isOwnProfile}
         onFollow={() => {}}
         onFriendRequest={() => {}}

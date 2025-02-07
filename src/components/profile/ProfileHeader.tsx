@@ -28,6 +28,9 @@ export function ProfileHeader({ profile, isOwnProfile, onFollow, onFriendRequest
         {/* Profile Info */}
         <div className="flex-1">
           <h1 className="text-2xl font-bold">{profile.username}</h1>
+          {profile.full_name && (
+            <h2 className="text-lg text-muted-foreground mb-2">{profile.full_name}</h2>
+          )}
           
           {/* Stats */}
           <div className="flex gap-4 mt-2 text-sm text-muted-foreground">

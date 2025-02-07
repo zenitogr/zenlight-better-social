@@ -12,7 +12,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ onMenuClick }: NavbarProps) {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -40,13 +40,21 @@ export function Navbar({ onMenuClick }: NavbarProps) {
               <Button variant="ghost" size="icon">
                 <Bell className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <Link href={`/profile/${user.id}`}>
-                  <div className="relative h-6 w-6 rounded-full bg-muted">
-                    {/* TODO: Add user avatar */}
-                  </div>
-                </Link>
-              </Button>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground hidden md:block">
+                  {profile?.full_name}
+                </span>
+                <Button variant="ghost" size="icon" asChild>
+                  <Link 
+                    href={`/profile/${profile?.username || ''}`}
+                    title={profile?.full_name || ''}
+                  >
+                    <div className="relative h-6 w-6 rounded-full bg-muted">
+                      {/* TODO: Add user avatar */}
+                    </div>
+                  </Link>
+                </Button>
+              </div>
               <Button variant="ghost" onClick={handleSignOut}>
                 Sign out
               </Button>
