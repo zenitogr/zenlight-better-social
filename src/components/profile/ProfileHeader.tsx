@@ -1,14 +1,14 @@
 "use client";
 
-import { Profile } from '@/types/profile';
-import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Profile } from '@/types/profile';
 
 interface ProfileHeaderProps {
   profile: Profile;
   isOwnProfile: boolean;
-  onFollow?: () => void;
-  onFriendRequest?: () => void;
+  onFollow: () => void;
+  onFriendRequest: () => void;
 }
 
 export function ProfileHeader({ profile, isOwnProfile, onFollow, onFriendRequest }: ProfileHeaderProps) {
@@ -18,8 +18,8 @@ export function ProfileHeader({ profile, isOwnProfile, onFollow, onFriendRequest
         {/* Avatar */}
         <div className="relative h-24 w-24">
           <Image
-            src={profile.avatarUrl || '/default-avatar.png'}
-            alt={profile.username}
+            src={profile.avatar_url || '/default-avatar.png'}
+            alt={profile.username || ''}
             fill
             className="rounded-full object-cover"
           />

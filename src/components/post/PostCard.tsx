@@ -20,17 +20,17 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
     formatDistanceToNow(new Date(post.created_at), { addSuffix: true }) : 
     'recently';
 
-  const author = post.profiles as any; // We'll improve this type later
+  const author = post.profiles;
 
   return (
     <div className="bg-card rounded-lg p-4 shadow-sm">
       {/* Author Info */}
       <div className="flex items-center gap-3 mb-4">
-        <Link href={`/profile/${author?.username || post.user_id}`}>
+        <Link href={`/profile/${author.username}`}>
           <div className="relative h-10 w-10">
             <Image
-              src={author?.avatar_url || "/default-avatar.png"}
-              alt={author?.full_name || "Author"}
+              src={author.avatar_url || "/default-avatar.png"}
+              alt={author.full_name || author.username}
               fill
               className="rounded-full object-cover"
             />
@@ -38,10 +38,10 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
         </Link>
         <div>
           <Link 
-            href={`/profile/${author?.username || post.user_id}`}
+            href={`/profile/${author.username}`}
             className="font-semibold hover:underline"
           >
-            {author?.full_name || author?.username || 'Anonymous'}
+            {author.full_name || author.username}
           </Link>
           <p className="text-sm text-muted-foreground">
             {formattedDate}
@@ -51,13 +51,6 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
 
       {/* Content */}
       <p className="mb-4 whitespace-pre-wrap">{post.content}</p>
-
-      {/* Media */}
-      {post.media && post.media.length > 0 && (
-        <div className="mb-4">
-          {/* TODO: Add media display */}
-        </div>
-      )}
 
       {/* Actions */}
       <div className="flex gap-4">
