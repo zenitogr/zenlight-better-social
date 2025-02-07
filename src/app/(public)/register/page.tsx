@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation';
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
   const { signUp } = useAuth();
   const router = useRouter();
@@ -17,7 +19,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signUp(email, password);
+      await signUp(email, password, username, fullName);
       router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error creating account');
@@ -37,6 +39,26 @@ export default function RegisterPage() {
             <p className="text-sm text-red-500">{error}</p>
           )}
           
+          <div>
+            <Input
+              type="text"
+              placeholder="Full Name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <Input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+
           <div>
             <Input
               type="email"

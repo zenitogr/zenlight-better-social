@@ -1,11 +1,10 @@
 export type Profile = {
   id: string;
-  username: string;
-  avatarUrl?: string;
-  friendCount: number;
-  followerCount: number;
-  followingCount: number;
-  isFollowing?: boolean;
-  isFriend?: boolean;
-  friendRequestStatus?: 'none' | 'pending' | 'received';
+  email: string;
+  username: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  created_at: string;
+  updated_at: string;
 }; 

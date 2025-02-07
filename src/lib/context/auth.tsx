@@ -1,15 +1,17 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
+import type { Profile } from '@/types/profile';
 
 interface AuthContextType {
   user: User | null;
+  profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, username: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -32,6 +34,7 @@ const debug = {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
   const router = useRouter();
@@ -46,6 +49,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     sessionStorage.setItem('auth_logs', '[]');
   }, []);
 
+  // Wrap fetchProfile in useCallback
+  const fetchProfile = useCallback(async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      setProfile(data);
+    } catch (error) {
+      debug.error('Error fetching profile:', error);
+    }
+  }, [user?.id, supabase]);
+
+  // Initial auth check
   useEffect(() => {
     const initializeAuth = async () => {
       console.log('🔵 Initializing auth on path:', typeof window !== 'undefined' ? window.location.pathname : 'server');
@@ -56,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session?.user) {
           console.log('🟢 Found existing session, user:', session.user.email);
           setUser(session.user);
+          await fetchProfile();
         } else {
           console.log('🟡 No existing session found');
         }
@@ -71,12 +94,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('🔄 Auth state changed:', event, 'User:', session?.user?.email, 
           'Path:', typeof window !== 'undefined' ? window.location.pathname : 'server');
         setUser(session?.user ?? null);
+        if (session?.user) {
+          await fetchProfile();
+        }
       }
     );
 
     initializeAuth();
     return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+  }, [supabase.auth, fetchProfile]);
+
+  // Profile sync effect
+  useEffect(() => {
+    if (user?.id) {
+      fetchProfile();
+    } else {
+      setProfile(null);
+    }
+  }, [user?.id, fetchProfile]);
+
+  // Auth state change handler
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('🔄 Auth state changed:', event, 'User:', session?.user?.email);
+        
+        if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setProfile(null);
+          router.push('/login');
+        } else if (session?.user) {
+          setUser(session.user);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth, router]);
 
   const signIn = async (email: string, password: string) => {
     console.log('🔵 Starting sign in for:', email);
@@ -93,9 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       console.log('🟢 Sign in successful for:', data.user?.email);
       setUser(data.user);
-      
-      console.log('🟢 Redirecting to home...');
-      window.location.href = '/';
+      router.push('/');
       
     } catch (error) {
       console.error('🔴 Sign in error:', error);
@@ -103,21 +155,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) throw error;
+  const signUp = async (email: string, password: string, username: string, fullName: string) => {
+    try {
+      const { error: signUpError, data } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username: username.toLowerCase(),
+            full_name: fullName,
+          },
+        },
+      });
+
+      if (signUpError) throw signUpError;
+
+      if (data.user) {
+        setUser(data.user);
+        // The profile will be created automatically via the database trigger
+      }
+    } catch (error) {
+      debug.error('Sign up error:', error);
+      throw error;
+    }
   };
 
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
       setUser(null);
-      router.replace('/login');
+      setProfile(null);
+      console.log('🟢 Sign out successful, redirecting to login');
+      router.push('/login');
     } catch (error) {
-      debug.error('Sign out error:', error);
+      console.error('🔴 Sign out error:', error);
       throw error;
     }
   };
@@ -125,6 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   console.log('AuthProvider rendering with user:', user?.email); // Track final render state
   const value: AuthContextType = {
     user,
+    profile,
     loading,
     signIn,
     signUp,
