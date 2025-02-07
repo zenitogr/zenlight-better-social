@@ -2,6 +2,7 @@
 
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
+import { PostInput } from '@/components/post/PostInput';
 import { notFound } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -9,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { Profile } from '@/types/profile';
 import { Post } from '@/types/post';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/lib/context/auth';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -16,6 +18,9 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  const isOwnProfile = profile?.id === user?.id;
 
   useEffect(() => {
     async function fetchProfileAndPosts() {
@@ -35,7 +40,14 @@ export default function ProfilePage() {
       // Fetch posts for this user
       const { data: postsData, error: postsError } = await supabase
         .from('posts')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            username,
+            full_name,
+            avatar_url
+          )
+        `)
         .eq('user_id', profileData.id)
         .order('created_at', { ascending: false });
 
@@ -60,17 +72,43 @@ export default function ProfilePage() {
     fetchProfileAndPosts();
   }, [username]);
 
+  const handleNewPost = async (content: string) => {
+    if (!user || !profile) return;
+    
+    try {
+      const supabase = createClient();
+      const { error: createError } = await supabase
+        .from('posts')
+        .insert([{ 
+          content,
+          user_id: user.id,
+        }]);
+
+      if (createError) throw createError;
+
+      // Refetch posts
+      const { data: newPosts, error: fetchError } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          profiles:user_id (
+            username,
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false });
+
+      if (fetchError) throw fetchError;
+      setPosts(newPosts || []);
+    } catch (error) {
+      console.error('Error creating post:', error);
+    }
+  };
+
   if (loading) {
-    return (
-      <div className="container max-w-4xl mx-auto py-6 px-4">
-        <Skeleton className="h-48 w-full mb-6" />
-        <div className="space-y-4">
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-      </div>
-    );
+    return <Skeleton className="h-full w-full" />;
   }
 
   if (!profile) {
@@ -79,12 +117,25 @@ export default function ProfilePage() {
 
   return (
     <main className="container max-w-4xl mx-auto py-6 px-4">
-      <ProfileHeader profile={profile} />
+      <ProfileHeader 
+        profile={profile}
+        isOwnProfile={isOwnProfile}
+        onFollow={() => {}}
+        onFriendRequest={() => {}}
+      />
+      
+      {/* Show PostInput only on own profile */}
+      {isOwnProfile && (
+        <div className="mt-6">
+          <PostInput onSubmit={handleNewPost} />
+        </div>
+      )}
+
       <div className="mt-6">
         <ProfileTabs 
           posts={posts}
-          comments={[]} // We'll implement comments later
-          likes={[]}    // We'll implement likes later
+          comments={[]}
+          likes={[]}
         />
       </div>
     </main>
