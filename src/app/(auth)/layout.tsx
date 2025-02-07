@@ -1,32 +1,33 @@
 "use client";
 
-import { ClientLayout } from "@/components/layout/ClientLayout";
-import { useAuth } from "@/lib/context/auth";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useAuth } from '@/lib/context/auth';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuth(); // This is now safe because useAuth will never return null
   const router = useRouter();
 
   console.log('🔄 AuthLayout render - Loading:', loading, 'User:', user?.email);
 
   useEffect(() => {
-    console.log('🔵 AuthLayout effect - Loading:', loading, 'User:', user?.email);
     if (!loading && !user) {
-      console.log('🟡 AuthLayout redirecting to login - No user found');
-      router.replace("/login");
+      console.log('🔴 No user found, redirecting to login');
+      router.replace('/login');
     }
   }, [user, loading, router]);
 
-  if (loading || !user) {
-    console.log('🟡 AuthLayout showing loading state');
-    return null;
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
-  return <ClientLayout>{children}</ClientLayout>;
+  if (!user) {
+    return null; // Don't render anything while redirecting
+  }
+
+  return <>{children}</>;
 } 

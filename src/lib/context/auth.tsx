@@ -13,21 +13,19 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | null>(null);
 
-// Create a debug function that both logs and stores messages
 const debug = {
-  log: (...args: any[]) => {
-    console.log('[Auth Debug]', ...args);
-    // Store in sessionStorage for persistence
+  log: (message: string, ...data: unknown[]) => {
+    console.log('[Auth Debug]', message, ...data);
     const logs = JSON.parse(sessionStorage.getItem('auth_logs') || '[]');
-    logs.push({ type: 'log', timestamp: new Date().toISOString(), message: args });
+    logs.push({ type: 'log', timestamp: new Date().toISOString(), message, data });
     sessionStorage.setItem('auth_logs', JSON.stringify(logs));
   },
-  error: (...args: any[]) => {
-    console.error('[Auth Error]', ...args);
+  error: (message: string, ...data: unknown[]) => {
+    console.error('[Auth Error]', message, ...data);
     const logs = JSON.parse(sessionStorage.getItem('auth_logs') || '[]');
-    logs.push({ type: 'error', timestamp: new Date().toISOString(), message: args });
+    logs.push({ type: 'error', timestamp: new Date().toISOString(), message, data });
     sessionStorage.setItem('auth_logs', JSON.stringify(logs));
   }
 };
@@ -125,8 +123,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   console.log('AuthProvider rendering with user:', user?.email); // Track final render state
+  const value: AuthContextType = {
+    user,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+  };
+  
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
@@ -134,7 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
