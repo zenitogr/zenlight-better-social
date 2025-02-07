@@ -20,15 +20,17 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
     formatDistanceToNow(new Date(post.created_at), { addSuffix: true }) : 
     'recently';
 
+  const author = post.profiles as any; // We'll improve this type later
+
   return (
     <div className="bg-card rounded-lg p-4 shadow-sm">
       {/* Author Info */}
       <div className="flex items-center gap-3 mb-4">
-        <Link href={`/profile/${post.user_id}`}>
+        <Link href={`/profile/${author?.username || post.user_id}`}>
           <div className="relative h-10 w-10">
             <Image
-              src="/default-avatar.png"
-              alt="Author"
+              src={author?.avatar_url || "/default-avatar.png"}
+              alt={author?.full_name || "Author"}
               fill
               className="rounded-full object-cover"
             />
@@ -36,10 +38,10 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
         </Link>
         <div>
           <Link 
-            href={`/profile/${post.user_id}`}
+            href={`/profile/${author?.username || post.user_id}`}
             className="font-semibold hover:underline"
           >
-            {post.user_id}
+            {author?.full_name || author?.username || 'Anonymous'}
           </Link>
           <p className="text-sm text-muted-foreground">
             {formattedDate}
@@ -48,7 +50,7 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
       </div>
 
       {/* Content */}
-      <p className="mb-4">{post.content}</p>
+      <p className="mb-4 whitespace-pre-wrap">{post.content}</p>
 
       {/* Media */}
       {post.media && post.media.length > 0 && (
@@ -61,15 +63,15 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
       <div className="flex gap-4">
         <Button variant="ghost" size="sm" onClick={onLike}>
           <Heart className="h-5 w-5 mr-1" />
-          {post.likes_count}
+          {post.likes_count || 0}
         </Button>
         <Button variant="ghost" size="sm" onClick={onComment}>
           <MessageCircle className="h-5 w-5 mr-1" />
-          0
+          {post.comments_count || 0}
         </Button>
         <Button variant="ghost" size="sm" onClick={onShare}>
           <Share2 className="h-5 w-5 mr-1" />
-          0
+          {post.shares_count || 0}
         </Button>
       </div>
     </div>

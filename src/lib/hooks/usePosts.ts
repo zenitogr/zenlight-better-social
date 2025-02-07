@@ -1,11 +1,13 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import type { Post } from '@/types/post';
 import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/lib/context/auth';
 
 export function usePosts(type: 'global' | 'personalized' = 'global') {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const { user } = useAuth();
   
   // Memoize the supabase client
   const supabase = useMemo(() => createClient(), []);
@@ -14,11 +16,19 @@ export function usePosts(type: 'global' | 'personalized' = 'global') {
     try {
       const query = supabase
         .from('posts')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            username,
+            full_name,
+            avatar_url
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (type === 'personalized') {
-        // Add personalization logic here
+        // Add personalization logic here later
+        // For example, only show posts from followed users
       }
 
       const { data, error: fetchError } = await query;
@@ -30,13 +40,18 @@ export function usePosts(type: 'global' | 'personalized' = 'global') {
     } finally {
       setLoading(false);
     }
-  }, [type, supabase]); // Add supabase to dependencies
+  }, [type, supabase]);
 
   const createPost = async (content: string) => {
+    if (!user) throw new Error('Must be logged in to create a post');
+
     try {
       const { error: createError } = await supabase
         .from('posts')
-        .insert([{ content }]);
+        .insert([{ 
+          content,
+          user_id: user.id,
+        }]);
 
       if (createError) throw createError;
       // Refetch posts after creating a new one
