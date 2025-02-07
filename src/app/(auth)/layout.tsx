@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/context/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { ClientLayout } from '@/components/layout/ClientLayout';
 
 export default function AuthLayout({
   children,
@@ -29,5 +30,6 @@ export default function AuthLayout({
     return null; // Don't render anything while redirecting
   }
 
-  return <>{children}</>;
+  // Wrap the children with ClientLayout
+  return <ClientLayout>{children}</ClientLayout>;
 } 

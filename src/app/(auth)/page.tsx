@@ -2,7 +2,6 @@
 
 import { PostInput } from '@/components/post/PostInput';
 import { PostCard } from '@/components/post/PostCard';
-import { ClientLayout } from '@/components/layout/ClientLayout';
 import type { Post } from '@/types/post';
 
 // Mock data for testing
@@ -31,24 +30,22 @@ const mockPosts: Post[] = [
 
 export default function Home() {
   return (
-    <ClientLayout>
-      <main className="container max-w-2xl mx-auto py-6 px-4">
-        <PostInput onSubmit={async (content) => {
-          console.log('New post:', content);
-        }} />
-        
-        <div className="mt-6 space-y-4">
-          {mockPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onLike={() => console.log('Like:', post.id)}
-              onComment={() => console.log('Comment:', post.id)}
-              onShare={() => console.log('Share:', post.id)}
-            />
-          ))}
-        </div>
-      </main>
-    </ClientLayout>
+    <main className="container max-w-2xl mx-auto py-6 px-4">
+      <PostInput onSubmit={async (content) => {
+        console.log('New post:', content);
+      }} />
+      
+      <div className="mt-6 space-y-4">
+        {mockPosts.map((post) => (
+          <PostCard
+            key={post.id}
+            post={post}
+            onLike={() => console.log('Like:', post.id)}
+            onComment={() => console.log('Comment:', post.id)}
+            onShare={() => console.log('Share:', post.id)}
+          />
+        ))}
+      </div>
+    </main>
   );
 }
