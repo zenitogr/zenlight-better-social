@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Profile } from '@/types/profile';
+import { Pencil } from 'lucide-react';
+import Link from 'next/link';
 
 interface ProfileHeaderProps {
   profile: Profile;
@@ -27,7 +29,18 @@ export function ProfileHeader({ profile, isOwnProfile, onFollow, onFriendRequest
 
         {/* Profile Info */}
         <div className="flex-1">
-          <h1 className="text-2xl font-bold">{profile.username}</h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold">{profile.username}</h1>
+            {isOwnProfile && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/settings">
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Link>
+              </Button>
+            )}
+          </div>
+          
           {profile.full_name && (
             <h2 className="text-lg text-muted-foreground mb-2">{profile.full_name}</h2>
           )}
