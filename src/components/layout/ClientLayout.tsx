@@ -11,12 +11,17 @@ interface ClientLayoutProps {
 export function ClientLayout({ children }: ClientLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
   return (
     <div className="relative flex min-h-full flex-col">
-      <Navbar onMenuClick={() => setSidebarOpen(true)} />
+      <Navbar 
+        onMenuClick={toggleSidebar} 
+        isSidebarOpen={sidebarOpen}
+      />
       
       <div className="flex flex-1">
-        <Sidebar isOpen={sidebarOpen} />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         
         {/* Overlay for mobile sidebar */}
         {sidebarOpen && (
@@ -26,7 +31,9 @@ export function ClientLayout({ children }: ClientLayoutProps) {
           />
         )}
         
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-10">
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -22,30 +22,33 @@ export function Sidebar({ isOpen }: SidebarProps) {
 
   return (
     <aside className={`
-      fixed left-0 top-14 z-30 h-[calc(100vh-3.5rem)] w-64 
+      fixed left-0 top-16 md:top-20 z-30 h-[calc(100vh-4rem)] md:h-[calc(100vh-5rem)] w-72 
       border-r bg-background transition-transform duration-300 
       md:sticky md:translate-x-0
       ${isOpen ? 'translate-x-0' : '-translate-x-full'}
     `}>
-      <div className="flex h-full flex-col gap-2 p-4">
-        <nav className="flex-1 space-y-1">
+      <div className="flex h-full flex-col gap-3 p-6">
+        <nav className="flex-1 space-y-2">
           {navItems.map(({ href, icon: Icon, label }) => (
             <Button
               key={href}
               variant="ghost"
-              className="w-full justify-start gap-2"
+              className="w-full justify-start gap-4 px-4 py-6 text-base"
               asChild
             >
               <Link href={href}>
-                <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5 md:h-6 md:w-6" />
                 {label}
               </Link>
             </Button>
           ))}
         </nav>
         
-        <Button variant="ghost" className="justify-start gap-2 text-red-500 hover:text-red-600">
-          <LogOut className="h-5 w-5" />
+        <Button 
+          variant="ghost" 
+          className="justify-start gap-4 px-4 py-6 text-base text-red-500 hover:text-red-600"
+        >
+          <LogOut className="h-5 w-5 md:h-6 md:w-6" />
           Logout
         </Button>
       </div>
