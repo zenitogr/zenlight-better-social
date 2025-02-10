@@ -16,63 +16,49 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, onLike, onComment, onShare, isLiked }: PostCardProps) {
-  // Format the date safely
-  const formattedDate = post.created_at ? 
-    formatDistanceToNow(new Date(post.created_at), { addSuffix: true }) : 
-    'recently';
-
-  const author = post.profiles;
-
   return (
-    <div className="bg-card rounded-lg p-4 shadow-sm">
-      {/* Author Info */}
-      <div className="flex items-center gap-3 mb-4">
-        <Link href={`/profile/${author.username}`}>
-          <div className="relative h-10 w-10">
-            <Image
-              src={author.avatar_url || "/default-avatar.png"}
-              alt={author.full_name || author.username}
-              fill
-              className="rounded-full object-cover"
-            />
-          </div>
+    <article className="border rounded-lg p-4 space-y-4 bg-card">
+      <div className="flex items-center gap-3">
+        <Link href={`/profile/${post.profiles.username}`}>
+          <Image
+            src={post.profiles.avatar_url || '/default-avatar.png'}
+            alt={post.profiles.username}
+            width={40}
+            height={40}
+            className="rounded-full"
+          />
         </Link>
         <div>
-          <Link 
-            href={`/profile/${author.username}`}
-            className="font-semibold hover:underline"
-          >
-            {author.full_name || author.username}
+          <Link href={`/profile/${post.profiles.username}`} className="font-medium hover:underline">
+            {post.profiles.full_name || post.profiles.username}
           </Link>
           <p className="text-sm text-muted-foreground">
-            {formattedDate}
+            {formatDistanceToNow(new Date(post.created_at || ''), { addSuffix: true })}
           </p>
         </div>
       </div>
 
-      {/* Content */}
-      <p className="mb-4 whitespace-pre-wrap">{post.content}</p>
+      <p className="text-base">{post.content}</p>
 
-      {/* Actions */}
       <div className="flex gap-4">
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`gap-2 ${isLiked ? 'text-red-500' : ''}`}
           onClick={onLike}
-          className={isLiked ? 'text-red-500 hover:text-red-600' : ''}
         >
-          <Heart className={`h-5 w-5 mr-1 ${isLiked ? 'fill-current' : ''}`} />
-          {post.likes_count || 0}
+          <Heart className="h-5 w-5" />
+          {post.likes_count}
         </Button>
-        <Button variant="ghost" size="sm" onClick={onComment}>
-          <MessageCircle className="h-5 w-5 mr-1" />
+        <Button variant="ghost" size="sm" className="gap-2" onClick={onComment}>
+          <MessageCircle className="h-5 w-5" />
           {post.comments_count || 0}
         </Button>
-        <Button variant="ghost" size="sm" onClick={onShare}>
-          <Share2 className="h-5 w-5 mr-1" />
+        <Button variant="ghost" size="sm" className="gap-2" onClick={onShare}>
+          <Share2 className="h-5 w-5" />
           {post.shares_count || 0}
         </Button>
       </div>
-    </div>
+    </article>
   );
 } 

@@ -16,15 +16,14 @@ export function PostInput({ onSubmit }: PostInputProps) {
   const { user } = useAuth();
 
   const handleSubmit = async () => {
-    if (!content.trim() || !user) return;
+    if (!content.trim() || isSubmitting) return;
     
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
       await onSubmit(content);
       setContent('');
     } catch (error) {
-      console.error('Failed to create post:', error);
-      // You might want to add error handling/toast here
+      console.error('Error submitting post:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -35,34 +34,23 @@ export function PostInput({ onSubmit }: PostInputProps) {
   }
 
   return (
-    <div className="bg-card rounded-lg p-4 shadow-sm">
+    <div className="border rounded-lg p-4 space-y-4 bg-card">
       <Textarea
         placeholder="What's on your mind?"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        className="min-h-[100px] mb-3 resize-none"
-        maxLength={500} // Match database constraint
+        className="min-h-[100px]"
       />
       <div className="flex justify-between items-center">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          disabled={true} // Disable for now since we're only handling text
-          title="Image upload coming soon"
-        >
-          <ImageIcon className="h-5 w-5 text-muted-foreground" />
+        <Button variant="ghost" size="icon" disabled={isSubmitting}>
+          <ImageIcon className="h-5 w-5" />
         </Button>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            {content.length}/500
-          </span>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={!content.trim() || isSubmitting}
-          >
-            {isSubmitting ? 'Posting...' : 'Post'}
-          </Button>
-        </div>
+        <Button 
+          onClick={handleSubmit}
+          disabled={!content.trim() || isSubmitting}
+        >
+          Post
+        </Button>
       </div>
     </div>
   );

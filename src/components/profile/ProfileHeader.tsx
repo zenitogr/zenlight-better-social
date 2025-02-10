@@ -15,66 +15,55 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ profile, isOwnProfile, onFollow, onFriendRequest }: ProfileHeaderProps) {
   return (
-    <div className="w-full bg-card p-6 rounded-lg shadow-sm">
-      <div className="flex items-start gap-4">
-        {/* Avatar */}
-        <div className="relative h-24 w-24">
-          <Image
-            src={profile.avatar_url || '/default-avatar.png'}
-            alt={profile.username || ''}
-            fill
-            className="rounded-full object-cover"
-          />
-        </div>
-
-        {/* Profile Info */}
-        <div className="flex-1">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold">{profile.username}</h1>
-            {isOwnProfile && (
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/settings">
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Link>
-              </Button>
-            )}
-          </div>
-          
-          {profile.full_name && (
-            <h2 className="text-lg text-muted-foreground mb-2">{profile.full_name}</h2>
-          )}
-          
-          {/* Stats */}
-          <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
-            <span>{profile.friendCount} friends</span>
-            <span>{profile.followerCount} followers</span>
-            <span>{profile.followingCount} following</span>
-          </div>
-
-          {/* Action Buttons */}
-          {!isOwnProfile && (
-            <div className="flex gap-2 mt-4">
-              <Button 
-                variant={profile.isFollowing ? "secondary" : "default"}
-                onClick={onFollow}
-              >
-                {profile.isFollowing ? 'Following' : 'Follow'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={onFriendRequest}
-                disabled={profile.friendRequestStatus === 'pending'}
-              >
-                {profile.isFriend ? 'Friends' : 
-                  profile.friendRequestStatus === 'pending' ? 'Request Pending' : 
-                  profile.friendRequestStatus === 'received' ? 'Accept Request' : 
-                  'Add Friend'}
-              </Button>
-            </div>
-          )}
+    <div className="space-y-4">
+      <div className="flex items-center gap-4">
+        <Image
+          src={profile.avatar_url || '/default-avatar.png'}
+          alt={profile.username || ''}
+          width={96}
+          height={96}
+          className="rounded-full"
+        />
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">{profile.full_name || profile.username}</h1>
+          <p className="text-muted-foreground">@{profile.username}</p>
         </div>
       </div>
+
+      <div className="flex gap-4">
+        {isOwnProfile ? (
+          <Button asChild>
+            <Link href="/settings">
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit Profile
+            </Link>
+          </Button>
+        ) : (
+          <>
+            <Button onClick={onFollow}>Follow</Button>
+            <Button variant="outline" onClick={onFriendRequest}>
+              Add Friend
+            </Button>
+          </>
+        )}
+      </div>
+
+      <div className="flex gap-6">
+        <div>
+          <div className="text-2xl font-bold">{profile.followerCount}</div>
+          <div className="text-muted-foreground">Followers</div>
+        </div>
+        <div>
+          <div className="text-2xl font-bold">{profile.followingCount}</div>
+          <div className="text-muted-foreground">Following</div>
+        </div>
+        <div>
+          <div className="text-2xl font-bold">{profile.friendCount}</div>
+          <div className="text-muted-foreground">Friends</div>
+        </div>
+      </div>
+
+      {profile.bio && <p>{profile.bio}</p>}
     </div>
   );
 } 
