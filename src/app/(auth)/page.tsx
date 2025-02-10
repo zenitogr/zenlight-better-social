@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
   const { user } = useAuth();
-  const { posts, loading, error, createPost } = usePosts();
+  const { posts, loading, error, createPost, likePost, likedPosts } = usePosts();
 
   const handleNewPost = async (content: string) => {
     if (!user) return;
@@ -57,9 +57,10 @@ export default function Home() {
             <PostCard
               key={post.id}
               post={post}
-              onLike={() => console.log('Like:', post.id)}
+              onLike={() => likePost(post.id)}
               onComment={() => console.log('Comment:', post.id)}
               onShare={() => console.log('Share:', post.id)}
+              isLiked={likedPosts.has(post.id)}
             />
           ))
         )}

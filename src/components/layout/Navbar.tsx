@@ -53,9 +53,6 @@ export function Navbar({ onMenuClick, isSidebarOpen }: NavbarProps) {
                 <Bell className="h-5 w-5 md:h-6 md:w-6" />
               </Button>
               <div className="flex items-center gap-3 md:gap-4">
-                <span className="text-sm md:text-base text-muted-foreground hidden md:block">
-                  {profile?.full_name}
-                </span>
                 <Button variant="ghost" size="lg" asChild>
                   <Link 
                     href={`/profile/${profile?.username || ''}`}
@@ -64,6 +61,9 @@ export function Navbar({ onMenuClick, isSidebarOpen }: NavbarProps) {
                     <div className="relative h-8 w-8 md:h-10 md:w-10 rounded-full bg-muted">
                       {/* TODO: Add user avatar */}
                     </div>
+                    <span className="ml-2 hidden md:inline">
+                      {profile?.full_name || profile?.username || 'Guest'}'s Profile
+                    </span>
                   </Link>
                 </Button>
               </div>

@@ -12,9 +12,10 @@ interface PostCardProps {
   onLike: () => void;
   onComment: () => void;
   onShare: () => void;
+  isLiked?: boolean;
 }
 
-export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
+export function PostCard({ post, onLike, onComment, onShare, isLiked }: PostCardProps) {
   // Format the date safely
   const formattedDate = post.created_at ? 
     formatDistanceToNow(new Date(post.created_at), { addSuffix: true }) : 
@@ -54,8 +55,13 @@ export function PostCard({ post, onLike, onComment, onShare }: PostCardProps) {
 
       {/* Actions */}
       <div className="flex gap-4">
-        <Button variant="ghost" size="sm" onClick={onLike}>
-          <Heart className="h-5 w-5 mr-1" />
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onLike}
+          className={isLiked ? 'text-red-500 hover:text-red-600' : ''}
+        >
+          <Heart className={`h-5 w-5 mr-1 ${isLiked ? 'fill-current' : ''}`} />
           {post.likes_count || 0}
         </Button>
         <Button variant="ghost" size="sm" onClick={onComment}>

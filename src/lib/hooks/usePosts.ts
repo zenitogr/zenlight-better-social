@@ -12,6 +12,9 @@ export function usePosts(type: 'global' | 'personalized' = 'global') {
   // Memoize the supabase client
   const supabase = useMemo(() => createClient(), []);
 
+  // Add new state for tracking liked posts
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+
   const fetchPosts = useCallback(async () => {
     try {
       const query = supabase
@@ -65,8 +68,59 @@ export function usePosts(type: 'global' | 'personalized' = 'global') {
     fetchPosts();
   }, [fetchPosts]);
 
-  const likePost = async () => {
-    // TODO: Implement like functionality
+  // Fetch liked posts on mount
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchLikedPosts = async () => {
+      const { data: likes } = await supabase
+        .from('likes')
+        .select('post_id')
+        .eq('user_id', user.id);
+
+      if (likes) {
+        setLikedPosts(new Set(likes.map(like => like.post_id)));
+      }
+    };
+
+    fetchLikedPosts();
+  }, [user, supabase]);
+
+  const likePost = async (postId: string) => {
+    if (!user) throw new Error('Must be logged in to like a post');
+
+    try {
+      if (likedPosts.has(postId)) {
+        // Unlike
+        const { error } = await supabase
+          .from('likes')
+          .delete()
+          .eq('post_id', postId)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+        
+        setLikedPosts(prev => {
+          const next = new Set(prev);
+          next.delete(postId);
+          return next;
+        });
+      } else {
+        // Like
+        const { error } = await supabase
+          .from('likes')
+          .insert([{ post_id: postId, user_id: user.id }]);
+
+        if (error) throw error;
+        
+        setLikedPosts(prev => new Set([...prev, postId]));
+      }
+
+      // Refetch posts to get updated counts
+      await fetchPosts();
+    } catch (err) {
+      throw err instanceof Error ? err : new Error('Failed to like post');
+    }
   };
 
   const commentOnPost = async () => {
@@ -81,5 +135,6 @@ export function usePosts(type: 'global' | 'personalized' = 'global') {
     likePost,
     commentOnPost,
     refetch: fetchPosts,
+    likedPosts, // Export the set of liked post IDs
   };
 } 
