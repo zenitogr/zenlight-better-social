@@ -7,12 +7,26 @@ import {
   Settings,
   LogOut
 } from 'lucide-react';
+import { useAuth } from '@/lib/context/auth';
+import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
   isOpen: boolean;
 }
 
 export function Sidebar({ isOpen }: SidebarProps) {
+  const { signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.push('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   const navItems = [
     { href: '/', icon: Home, label: 'Home' },
     { href: '/friends', icon: Users, label: 'Friends' },
@@ -47,6 +61,7 @@ export function Sidebar({ isOpen }: SidebarProps) {
         <Button 
           variant="ghost" 
           className="justify-start gap-4 px-4 py-6 text-base text-red-500 hover:text-red-600"
+          onClick={handleSignOut}
         >
           <LogOut className="h-5 w-5 md:h-6 md:w-6" />
           Logout
